@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La botella azul</title>
+<style>
+
+:root{--blue:#304eea;--muted:#626e73;--line:#dfe4e4}
+*{box-sizing:border-box}
+body{margin:0;padding:4px;background:#f7f8f6;color:#1d2829;font-family:Arial,sans-serif}
+button,select{font:inherit;cursor:pointer;touch-action:manipulation}
+button:focus-visible,select:focus-visible{outline:3px solid #304eea;outline-offset:4px}
+.experiment{max-width:1280px;margin:auto;display:grid;grid-template-columns:1.52fr 1fr;border:1px solid var(--line);border-radius:20px;overflow:hidden;background:#fff}
+.lab{padding:36px;background:#edf3f6;border-right:1px solid var(--line);min-width:0}
+.lab-top,.observation-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.section-kicker{font-size:10px;letter-spacing:1.8px;color:var(--muted)}
+.lab-top h2{margin:13px 0 0;font-size:24px;font-weight:500;letter-spacing:-.6px}
+.live-tag{display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:.6px;color:var(--muted);white-space:nowrap}
+.live-tag>span{width:6px;height:6px;border-radius:50%;background:#779287}
+.bottle-stage{height:405px;position:relative;isolation:isolate}
+.stage-grid{position:absolute;inset:20px 0 40px;background:radial-gradient(#c4d3df 1px,transparent 1px);background-size:24px 24px;opacity:.4;mask-image:radial-gradient(ellipse,#000,transparent 70%)}
+.bottle{position:absolute;left:50%;top:-9px;width:351px;height:400px;transform:translateX(-50%);transform-origin:center 75%;overflow:visible}
+.bottle-shadow{position:absolute;bottom:50px;left:50%;transform:translateX(-50%);width:190px;height:18px;background:#748fa5;opacity:.13;filter:blur(10px);border-radius:50%}
+.stage-index{position:absolute;left:0;bottom:58px;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;letter-spacing:1.3px;color:var(--muted)}
+.annotation{position:absolute;color:var(--muted);font-size:12px;line-height:1.5;z-index:2}
+.annotation-left{left:20px;top:207px}
+.annotation-dot{display:block;height:5px;width:5px;border-radius:50%;background:#7895ab;margin-bottom:9px}
+.annotation-line{position:absolute;display:block;height:1px;background:#c1ced7;width:50px}
+.annotation-left .annotation-line{left:78px;top:23px;transform:rotate(-14deg)}
+.annotation-right{right:26px;top:100px}
+.annotation-right .annotation-line{right:74px;top:45px;transform:rotate(-23deg)}
+.o2-symbol{display:block;font-family:Georgia,serif;font-style:italic;font-size:30px;margin-bottom:7px}
+.o2-symbol sub{font-size:15px}
+.stage-state{position:absolute;bottom:10px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:12px}
+.stage-state>span:first-child{height:8px;width:8px;border-radius:50%;border:1px solid #bdceda;background:#d0dfe8}
+.lab-controls{display:flex;align-items:center;gap:18px;margin-top:24px}
+.shake-button{flex:1;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 20px;height:55px;border:0;border-radius:10px;background:var(--blue);color:white;font-size:13px;white-space:nowrap;box-shadow:0 4px 8px #3052ed16}
+.shake-button:hover{background:#2541d2}
+.shake-button:active{transform:translateY(1px)}
+.shake-button svg,.reset-button svg{height:20px;width:20px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.button-arrow{margin-left:auto;display:flex}
+.auto-button{display:flex;align-items:center;gap:9px;padding:8px 0;border:0;background:none;font-size:11px;color:var(--muted);white-space:nowrap}
+.switch-track{display:block;width:34px;height:21px;padding:3px;border-radius:20px;background:#cad6de;transition:background .2s}
+.switch-track>span{display:block;width:15px;height:15px;background:white;border-radius:50%;transition:transform .2s}
+.auto-button[aria-checked=true] .switch-track{background:var(--blue)}
+.auto-button[aria-checked=true] .switch-track>span{transform:translateX(13px)}
+.reset-button{height:40px;width:40px;flex-shrink:0;display:grid;place-items:center;border:1px solid #c8d4dc;border-radius:9px;background:none;color:var(--muted)}
+.control-hint{margin:15px 0 0;text-align:center;font-size:11px;color:var(--muted)}
+.observation{min-width:0;padding:36px}
+.observation-top{align-items:center}
+.observation-top .section-kicker{font-size:9px;letter-spacing:1.5px}
+.phase-badge{display:flex;align-items:center;gap:5px;padding:6px 8px;background:#f0f4f0;color:#526b56;font-size:8px;letter-spacing:.8px;border-radius:4px;white-space:nowrap}
+.phase-badge i{height:4px;width:4px;background:currentColor;border-radius:50%}
+.phase-badge.blue{color:var(--blue);background:#edf1ff}
+.phase-copy{min-height:184px;padding-top:30px}
+.phase-copy h2{margin:0 0 15px;font-size:31px;font-weight:400;letter-spacing:-1.1px;line-height:1.2}
+.phase-copy p{margin:0;font-size:13px;line-height:1.85;color:var(--muted)}
+.oxygen-readout{margin-top:20px}
+.meter-label{display:flex;justify-content:space-between;gap:10px;font-size:12px}
+.relative{color:var(--muted);font-size:10px}
+#oxygen-label{color:var(--blue);font-size:10px}
+.meter{height:6px;margin-top:14px;background:#edf0f0;overflow:hidden;border-radius:4px}
+.meter>span{display:block;width:2.5%;height:100%;background:var(--blue);border-radius:4px}
+.meter-scale{display:flex;justify-content:space-between;margin-top:10px;color:var(--muted);font-size:8px;letter-spacing:1.2px}
+.steps{margin-top:30px}
+.step{position:relative;display:flex;gap:14px;padding-bottom:22px}
+.step:not(:last-child):before{content:'';position:absolute;left:13px;top:32px;bottom:6px;width:1px;background:#e4e9eb}
+.step-number{display:grid;place-items:center;flex-shrink:0;width:28px;height:28px;border:1px solid #b9c4c8;border-radius:50%;font-size:9px;color:var(--muted)}
+.step.active .step-number{color:var(--blue);background:#edf1ff;border-color:#d6dfff}
+.step h3{margin:3px 0 6px;font-size:13px;font-weight:500}
+.step p{margin:0;color:var(--muted);font-size:11px;line-height:1.8}
+.step-dot{height:5px;width:5px;flex-shrink:0;margin:12px 0 0 auto;border-radius:50%;background:#d6dce0}
+.step.active .step-dot{background:var(--blue)}
+.session{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:19px;border-top:1px solid var(--line)}
+.session>div{display:flex;align-items:center;gap:10px}
+.session-value{font-size:25px;color:#46545c;letter-spacing:-1px}
+.session>div>span:last-child{font-size:8px;letter-spacing:.9px;color:var(--muted)}
+.session label{display:flex;align-items:center;gap:8px;font-size:9px;color:var(--muted)}
+.session select{padding:5px;border:1px solid var(--line);border-radius:5px;background:#fafbfb;font-size:10px;color:#4d5b62}
+@media(max-width:1050px){.lab,.observation{padding:25px}.lab-controls{gap:12px}.auto-button{font-size:10px}.annotation-left{left:0}.annotation-right{right:0}.annotation-line{width:25px}.bottle{width:325px;height:370px;top:10px}.phase-copy h2{font-size:27px}.session{flex-wrap:wrap}}
+@media(max-width:800px){body{padding:12px}.experiment{grid-template-columns:1fr;max-width:600px}.lab{border-right:0;border-bottom:1px solid var(--line)}.bottle-stage{height:390px}.phase-copy{min-height:170px}.session{flex-wrap:nowrap}}
+@media(max-width:420px){.lab,.observation{padding:23px 20px}.section-kicker{font-size:8px}.live-tag{font-size:6px}.lab-top h2{font-size:21px}.bottle-stage{height:355px}.bottle{width:290px;height:330px;top:0}.annotation{font-size:9px}.annotation-left{top:180px}.annotation-left .annotation-line{left:55px;width:20px}.annotation-right{top:85px}.annotation-right .annotation-line{right:55px;width:20px}.stage-index{font-size:6px}.stage-state{font-size:10px}.shake-button{padding:0 12px;font-size:11px;height:48px}.lab-controls{gap:12px}.auto-button{font-size:0;position:relative}.auto-button:after{content:'Auto';position:absolute;top:31px;left:7px;font-size:8px}.reset-button{width:32px;height:34px}.control-hint{font-size:9px;margin-top:20px}.session{gap:8px}.session label{font-size:8px}.session>div{gap:6px}.session>div>span:last-child{font-size:7px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+    <section class="experiment" aria-label="Simulador de la reacción de la botella azul">
+      <div class="lab">
+        <div class="lab-top"><div><span class="section-kicker">TU MESA DE LABORATORIO</span><h2>La botella azul</h2></div><span class="live-tag"><span></span> SIMULACIÓN EN VIVO</span></div>
+        <div class="bottle-stage" id="stage">
+          <div class="stage-grid" aria-hidden="true"></div>
+          <span class="stage-index" aria-hidden="true">FIG. 01 / REDOX</span>
+          <div class="annotation annotation-left" aria-hidden="true"><span class="annotation-dot"></span>Azul de<br>metileno<span class="annotation-line"></span></div>
+          <div class="annotation annotation-right" aria-hidden="true"><span class="o2-symbol">O<sub>2</sub></span>El aire es<br>la clave<span class="annotation-line"></span></div>
+          <div class="bottle-shadow" id="bottle-shadow" aria-hidden="true"></div>
+          <svg class="bottle" id="bottle" viewBox="0 0 360 410" role="img" aria-labelledby="bottle-title bottle-desc">
+            <title id="bottle-title">Botella de la reacción del azul de metileno</title>
+            <desc id="bottle-desc">La mezcla está incolora. Pulsa Agitar la botella para observar el cambio.</desc>
+            <defs>
+              <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#c4d3df" stop-opacity=".4"/><stop offset=".18" stop-color="white" stop-opacity=".7"/><stop offset=".45" stop-color="white" stop-opacity=".06"/><stop offset=".84" stop-color="white" stop-opacity=".5"/><stop offset="1" stop-color="#97b0c3" stop-opacity=".45"/></linearGradient>
+              <linearGradient id="liquid-clear" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e6f3f5" stop-opacity=".6"/><stop offset="1" stop-color="#c0d8df" stop-opacity=".65"/></linearGradient>
+              <linearGradient id="liquid-blue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#4596ff"/><stop offset=".4" stop-color="#1c56e9"/><stop offset="1" stop-color="#1230ad"/></linearGradient>
+              <linearGradient id="cap" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#27384e"/><stop offset=".35" stop-color="#4f5c6d"/><stop offset=".7" stop-color="#34465b"/><stop offset="1" stop-color="#1d2e44"/></linearGradient>
+              <linearGradient id="shine" x1="0" y1="0" x2="1" y2="0"><stop stop-color="white" stop-opacity=".78"/><stop offset="1" stop-color="white" stop-opacity="0"/></linearGradient>
+              <clipPath id="bottle-clip"><path d="M148 65 L212 65 L212 112 Q212 123 226 134 L263 164 Q274 174 274 194 L274 345 Q274 365 254 367 L106 367 Q86 365 86 345 L86 194 Q86 174 97 164 L134 134 Q148 123 148 112 Z"/></clipPath>
+              <filter id="soft-shadow" x="-30%" y="-20%" width="160%" height="160%"><feDropShadow dx="0" dy="10" stdDeviation="9" flood-color="#53718a" flood-opacity=".11"/></filter>
+            </defs>
+            <g filter="url(#soft-shadow)">
+              <path d="M144 62 L216 62 L216 112 Q216 121 230 132 L267 161 Q279 173 279 194 L279 345 Q279 371 254 372 L106 372 Q81 371 81 345 L81 194 Q81 173 93 161 L130 132 Q144 121 144 112 Z" fill="url(#glass)" stroke="#aebfcd" stroke-width="1.6"/>
+              <g clip-path="url(#bottle-clip)">
+                <path id="clear-liquid" d="M75 224 Q128 219 180 224 T285 224 V380 H75 Z" fill="url(#liquid-clear)"/>
+                <g id="blue-liquid" opacity="0"><path id="color-liquid" d="M75 224 Q128 219 180 224 T285 224 V380 H75 Z" fill="url(#liquid-blue)"/><path id="liquid-surface" d="M75 224 Q128 219 180 224 T285 224" fill="none" stroke="#81b8ff" stroke-width="3"/></g>
+                <g id="bubbles" fill="#f1f7ff" fill-opacity=".65"></g>
+                <path d="M94 180 Q108 165 120 161 L120 345 Q120 355 108 355 L99 351 Z" fill="url(#shine)" opacity=".6"/>
+                <path d="M259 183 L264 194 V343 Q264 354 254 356 L252 196 Z" fill="white" opacity=".35"/>
+                <path d="M98 357 Q179 370 265 357" fill="none" stroke="white" stroke-width="3" opacity=".5"/>
+                <path d="M153 69 V112 Q154 127 137 140 L103 168" fill="none" stroke="white" stroke-width="5" opacity=".65"/>
+              </g>
+              <path d="M144 72 H216 M145 81 H215" stroke="#8c9faf" stroke-width="1.5" opacity=".45"/>
+              <rect x="139" y="40" width="82" height="30" rx="6" fill="url(#cap)"/>
+              <rect x="139" y="60" width="82" height="9" rx="2" fill="#26384e"/>
+              <path d="M146 45v13m5-13v13m5-13v13m5-13v13m5-13v13m5-13v13m5-13v13m5-13v13m5-13v13m5-13v13m5-13v13m5-13v13m5-13v13m5-13v13" stroke="#8592a2" stroke-opacity=".38"/>
+              <path d="M144 42 H216" stroke="#8793a2" stroke-width="1.5" stroke-linecap="round"/>
+              <g opacity=".58" stroke="#839aaa" stroke-width="1"><path d="M242 233h17m-10 26h10m-17 26h17m-10 26h10m-17 26h17"/></g>
+            </g>
+          </svg>
+          <div class="stage-state"><span id="state-color-dot"></span><span id="liquid-state">La mezcla está incolora</span></div>
+        </div>
+        <div class="lab-controls">
+          <button class="shake-button" id="shake"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 4 2-2m6 18-2 2M5 8 3 10m18 4-2 2M14 4l6 6-9 9a3 3 0 0 1-4 0l-2-2a3 3 0 0 1 0-4zM9 9l6 6"/></svg><span>Agitar la botella</span><span class="button-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19 19 5M5 5h14v14"/></svg></span></button>
+          <button class="auto-button" id="auto" role="switch" aria-checked="false"><span class="switch-track"><span></span></span>Modo automático</button>
+          <button class="reset-button" id="reset" aria-label="Reiniciar simulación" title="Reiniciar simulación"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg></button>
+        </div>
+        <p class="control-hint">Pulsa para agitar. Después, observa sin tocar.</p>
+      </div>
+
+      <aside class="observation" aria-label="Observación y controles">
+        <div class="observation-top"><span class="section-kicker">¿QUÉ ESTÁ PASANDO?</span><span class="phase-badge" id="phase-badge"><i></i><span>EN REPOSO</span></span></div>
+        <div class="phase-copy" aria-live="polite" aria-atomic="true"><h2 id="phase-title">Todo empieza<br>con una sacudida.</h2><p id="phase-description">La mezcla está en su forma incolora. Agita la botella para incorporar oxígeno y despertar el azul.</p></div>
+        <div class="oxygen-readout"><div class="meter-label"><span>Oxígeno disuelto <span class="relative">/ relativo</span></span><span id="oxygen-label">Muy bajo</span></div><div class="meter" role="progressbar" aria-label="Nivel relativo de oxígeno disuelto" aria-valuemin="0" aria-valuemax="100" aria-valuenow="3" id="oxygen-meter"><span id="oxygen-fill"></span></div><div class="meter-scale"><span>MENOS O₂</span><span>MÁS O₂</span></div></div>
+        <div class="steps">
+          <div class="step active" id="step-shake"><span class="step-number">01</span><div><h3>Agita</h3><p>El oxígeno oxida el colorante. <br>La mezcla se vuelve azul.</p></div><span class="step-dot" aria-hidden="true"></span></div>
+          <div class="step" id="step-wait"><span class="step-number">02</span><div><h3>Deja reposar</h3><p>La glucosa reduce el colorante. <br>El azul se desvanece.</p></div><span class="step-dot" aria-hidden="true"></span></div>
+          <div class="step" id="step-repeat"><span class="step-number">03</span><div><h3>Vuelve a empezar</h3><p>Otra sacudida, otro cambio.</p></div><span class="step-dot" aria-hidden="true"></span></div>
+        </div>
+        <div class="session"><div><span class="session-value" id="cycles">00</span><span>AGITACIONES</span></div><label for="speed">Ritmo de simulación <select id="speed"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select></label></div>
+      </aside>
+    </section>
+<script>
+// Qualitative teaching model. Values are relative, not laboratory measurements.
+function createReaction() {
+  return { oxygen: 0.025, blue: 0, shakeLeft: 0, cycles: 0, elapsed: 0, auto: false, speed: 1 };
+}
+function shake(state) {
+  if (state.shakeLeft <= 0) state.cycles += 1;
+  state.shakeLeft = 2.8;
+}
+function advance(state, seconds) {
+  const duration = Math.max(0, Math.min(seconds, 0.15)) * state.speed;
+  const steps = Math.max(1, Math.ceil(duration / 0.025));
+  const dt = duration / steps;
+  for (let i = 0; i < steps; i += 1) {
+    if (state.auto && state.shakeLeft <= 0 && state.blue < 0.035) shake(state);
+    state.elapsed += dt;
+    const shaking = state.shakeLeft > 0;
+    state.shakeLeft = Math.max(0, state.shakeLeft - dt);
+    state.oxygen = Math.max(0, Math.min(1, state.oxygen + (shaking ? 2.1 * (1 - state.oxygen) - 0.035 : -0.095) * dt));
+    const oxidation = state.oxygen * 4.4 * (1 - state.blue);
+    const reduction = (1 - state.oxygen) * 0.38 * state.blue;
+    state.blue = Math.max(0, Math.min(1, state.blue + (oxidation - reduction) * dt));
+  }
+  return state;
+}
+function phase(state) {
+  if (state.shakeLeft > 0) return 'shaking';
+  if (state.blue > 0.72) return 'blue';
+  if (state.blue > 0.045) return 'fading';
+  return 'clear';
+}
+
+
+const byId = id => document.getElementById(id);
+let state = createReaction();
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const bottle = byId('bottle');
+const bubbles = byId('bubbles');
+const bubbleNodes = Array.from({length: 14}, (_, i) => {
+  const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  circle.setAttribute('r', String(1.5 + (i % 4) * .65));
+  circle.setAttribute('cx', String(105 + ((i * 43) % 148)));
+  bubbles.append(circle);
+  return circle;
+});
+let currentPhase = '';
+let meterValue = -1;
+let lastTime = 0;
+let renderClock = 0;
+const phaseCopy = {
+  shaking: ['AGITANDO', 'Un poco de aire.<br>Y aparece el azul.', 'La agitación incorpora oxígeno del aire al líquido. El oxígeno oxida el colorante y la mezcla se vuelve azul.', 'La mezcla se está volviendo azul'],
+  blue: ['FORMA OXIDADA', 'El azul está<br>en su momento.', 'Predomina la forma oxidada del azul de metileno. Deja la botella en reposo y observa cómo cambia poco a poco.', 'La mezcla está azul'],
+  fading: ['EN REDUCCIÓN', 'La calma también<br>hace química.', 'La glucosa reduce el colorante a su forma incolora. Al consumirse el oxígeno disuelto, el azul se desvanece.', 'El azul se está desvaneciendo'],
+  clear: ['EN REPOSO', 'Lista para<br>volver a cambiar.', 'Predomina la forma incolora del colorante. Otra sacudida incorporará oxígeno y el azul volverá a aparecer.', 'La mezcla está incolora']
+};
+
+function render() {
+  const p = phase(state);
+  const isShaking = p === 'shaking';
+  byId('blue-liquid').setAttribute('opacity', state.blue.toFixed(3));
+  const amplitude = isShaking && !reducedMotion.matches ? 9 : 1.1;
+  const wave = Math.sin(renderClock * (isShaking ? 12 : 1.5)) * amplitude;
+  const path = `M75 ${224 + wave} Q128 ${220 - wave} 180 ${224 - wave} T285 ${224 + wave}`;
+  byId('clear-liquid').setAttribute('d', `${path} V380 H75 Z`);
+  byId('color-liquid').setAttribute('d', `${path} V380 H75 Z`);
+  byId('liquid-surface').setAttribute('d', path);
+  if (isShaking && !reducedMotion.matches) {
+    const tilt = Math.sin(renderClock * 24) * 5;
+    const x = Math.sin(renderClock * 24) * 5;
+    bottle.style.transform = `translateX(calc(-50% + ${x}px)) rotate(${tilt}deg)`;
+  } else bottle.style.transform = 'translateX(-50%)';
+  bubbleNodes.forEach((circle, i) => {
+    const y = 350 - ((renderClock * (isShaking ? 61 : 18) + i * 19) % 115);
+    circle.setAttribute('cy', String(y));
+    circle.style.opacity = reducedMotion.matches ? '0' : String(isShaking ? .6 : state.blue * .08);
+  });
+  const percent = Math.round(state.oxygen * 100);
+  if (percent !== meterValue) {
+    meterValue = percent;
+    byId('oxygen-fill').style.width = `${percent}%`;
+    byId('oxygen-meter').setAttribute('aria-valuenow', String(percent));
+    byId('oxygen-label').textContent = percent < 15 ? 'Muy bajo' : percent < 40 ? 'Bajo' : percent < 72 ? 'Medio' : 'Alto';
+  }
+  byId('state-color-dot').style.background = `rgba(40, 81, 232, ${Math.max(.05, state.blue)})`;
+  if (p !== currentPhase) {
+    currentPhase = p;
+    const copy = phaseCopy[p];
+    byId('phase-badge').querySelector('span').textContent = copy[0];
+    byId('phase-badge').classList.toggle('blue', isShaking || p === 'blue');
+    byId('phase-title').innerHTML = state.cycles === 0 ? 'Todo empieza<br>con una sacudida.' : copy[1];
+    byId('phase-description').textContent = state.cycles === 0 ? 'La mezcla está en su forma incolora. Agita la botella para incorporar oxígeno y despertar el azul.' : copy[2];
+    byId('liquid-state').textContent = copy[3];
+    byId('bottle-desc').textContent = `${copy[3]}. ${copy[2]}`;
+    byId('step-shake').classList.toggle('active', isShaking || state.cycles === 0);
+    byId('step-wait').classList.toggle('active', p === 'blue' || p === 'fading');
+    byId('step-repeat').classList.toggle('active', p === 'clear' && state.cycles > 0);
+  }
+  byId('cycles').textContent = String(state.cycles).padStart(2, '0');
+  byId('shake').querySelector('span').textContent = isShaking ? 'Agitando…' : 'Agitar la botella';
+}
+
+byId('shake').addEventListener('click', () => { shake(state); render(); });
+byId('auto').addEventListener('click', () => {
+  state.auto = !state.auto;
+  byId('auto').setAttribute('aria-checked', String(state.auto));
+  if (state.auto && state.blue < .035) shake(state);
+  render();
+});
+byId('reset').addEventListener('click', () => {
+  state = createReaction();
+  currentPhase = '';
+  renderClock = 0;
+  byId('speed').value = '1';
+  byId('auto').setAttribute('aria-checked', 'false');
+  render();
+});
+byId('speed').addEventListener('change', event => { state.speed = Number(event.target.value); });
+
+function frame(now) {
+  const dt = lastTime ? Math.min((now - lastTime) / 1000, .1) : 0;
+  lastTime = now;
+  if (!document.hidden) {
+    advance(state, dt);
+    renderClock += dt * state.speed;
+    render();
+  }
+  requestAnimationFrame(frame);
+}
+document.addEventListener('visibilitychange', () => { lastTime = 0; });
+render();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
